@@ -1,0 +1,39 @@
+# Appearance-changing toys the DB2 aura scan CANNOT find.
+#
+# These use SPELL_EFFECT_DUMMY / SCRIPT_EFFECT (EffectAura = 0) and do the
+# transform server-side, so there is no EffectAura == 56 row to match on.
+# They have to be listed by hand. Verified by reading each item's "Use:" text.
+#
+# Format: <itemID>   # name -- why it qualifies
+# Blank lines and #-comments are ignored.
+
+86568    # Mr. Smite's Brass Compass -- proc transforms you into a ghost pirate
+86589    # Ai-Li's Skymirror -- copies the target's appearance
+103685   # Celestial Defender's Medallion -- guise of a Celestial Defender
+112384   # Reflecting Prism -- swaps appearances with a party member
+118244   # Iron Buccaneer's Hat -- Iron Horde swashbuckler disguise
+119134   # Sargerei Disguise
+120276   # Outrider's Bridle Chain -- Warsong orc disguise
+122304   # Fandral's Seed Pouch -- Druid of the Flame form
+127668   # Jewel of Hellfire -- forehead jewel visual
+127696   # Magic Pet Mirror -- take the appearance of your battle pet
+127709   # Throbbing Blood Orb -- Bleeding Hollow transform
+128310   # Burning Blade -- Burning Blade banner and weaponry
+129938   # Will of Northrend -- vrykul transform
+166544   # Dark Ranger's Spare Cowl
+166779   # Transmorpher Beacon -- Ethereal Transmorpher, random appearance
+166790   # Highborne Memento -- possessed by a Highborne spirit
+179393   # Mirror of Envious Dreams -- class-fantasy appearance
+198173   # Atomic Recalibrator -- rearranges genetic composition
+200636   # Primal Invocation Quintessence -- elemental transform
+200707   # Armoire of Endless Cloaks -- Wrathion's cloak collection (transmog)
+200857   # Talisman of Sargha -- random djaradin appearance
+201815   # Cloak of Many Faces -- cosmetic cloak
+202253   # Primal Stave of Claw and Fur -- Winterpelt Furbolg
+208421   # Compendium of the New Moon -- transform into a giant wolf
+216881   # Duck Disguiser -- transform into a tiny duck
+224783   # Sovereign's Finery Chest -- dress-up chest (transmog)
+226373   # Everlasting Noggenfogger Elixir -- skeleton / shrink / slowfall
+234950   # Atomic Regoblinator -- goblinates the user
+244792   # Etheric Brannmorpher -- Ethereal Transmorpher, 1 hour
+245567   # K'aresh Memory Crystal -- take on the appearance of a K'areshi

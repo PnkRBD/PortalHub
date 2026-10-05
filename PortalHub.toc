@@ -1,0 +1,41 @@
+## Interface: 120007, 120100
+## Interface-Retail: 120007, 120100
+## Title: PortalHub
+## Notes: Portal buttons for M+ teleports, mage portals, hearthstones, and transmog toys.
+## Author: BluAddons
+## Version: 2.1
+## IconTexture: Interface\AddOns\PortalHub\Media\portalhub_icon
+## SavedVariables: PortalHubDB
+## OptionalDeps: LibDBIcon-1.0, RaiderIO
+
+Libs/LibStub/LibStub.lua
+
+Libs/PHub/PHub.xml
+
+Libs/CallbackHandler-1.0/CallbackHandler-1.0.lua
+Libs/LibDataBroker-1.1/LibDataBroker-1.1.lua
+Libs/LibDBIcon-1.0/LibDBIcon-1.0.lua
+
+Libs/LibKeystone/LibKeystone.lua
+
+Data/DungeonPortals.lua
+Data/MagePortals.lua
+Data/Hearths.lua
+# GENERATED - do not hand-edit. Toy IDs/names come from Blizzard's own client data
+# (Toy/ItemEffect/SpellEffect/ItemSparse DB2 tables, pulled as CSV from wago.tools).
+# Regenerate after a patch: bash tools/pull-toys.sh --refresh
+# Add/remove entries via tools/curated-extra.txt and tools/exclude.txt.
+Data/TransmogToys.lua
+
+Helpers.lua
+
+Tabs/Portals.lua
+Tabs/Mage.lua
+Tabs/Hearths.lua
+Tabs/Transmog.lua
+Tabs/Group.lua
+Tabs/Alts.lua
+Tabs/Favorites.lua
+Tabs/Settings.lua
+
+Core.lua

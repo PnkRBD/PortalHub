@@ -1,0 +1,29 @@
+PortalHub
+Copyright (c) 2026 Blu. All rights reserved.
+
+PortalHub, its source code, data, artwork and documentation are the property
+of the copyright holder. This licence grants you the following rights and no
+others.
+
+You may:
+
+1. Install and use PortalHub in World of Warcraft.
+2. Change it for your own private use.
+
+You may not:
+
+1. Redistribute PortalHub, changed or unchanged, anywhere other than the
+   copyright holder's own CurseForge and GitHub pages.
+2. Publish, sell or otherwise make available any changed version of it.
+3. Rename the addon or its folder, or present it as your own work.
+4. Use its code, data structures, configuration or interface design, in
+   whole or in part, as a basis, template or reference for other software.
+
+Third-party libraries under Libs keep their own licences and belong to
+their respective authors.
+
+PortalHub is provided as is, without warranty of any kind, express or
+implied, including but not limited to the warranties of merchantability,
+fitness for a particular purpose and non-infringement.
+
+Contact pinkrbd on Discord for anything this licence does not cover.
