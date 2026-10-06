@@ -1,19 +1,15 @@
-# Toys to keep OUT of Data/TransmogToys.lua even if a scan picks them up.
-# These summon objects, play animations, or are novelty items -- they do not
-# change how your character looks.
-#
-# Format: <itemID>   # name -- why it is excluded
+# toys the scan picks up that don't change your look
 
-32542    # Imp in a Ball -- fortune teller
-86571    # Kang's Bindstone -- encases the *enemy*, not you
+32542    # Imp in a Ball, just a fortune teller
+86571    # Kang's Bindstone, hits the enemy not you
 86593    # Hozen Beach Ball
-116139   # Haunting Memento -- affects the target, not you
+116139   # Haunting Memento, only affects your target
 118427   # Autographed Hearthstone Card
-119210   # Hearthstone Board -- places an object
-130158   # Path of Elothir -- leaf trail, no model change
-151343   # Hearthstation (gnome) -- places an object
-151344   # Hearthstation (goblin) -- places an object
-200198   # Primalist Prison -- cage prop, no model change
-208433   # Bronze Racer's Pennant -- displays a pennant
-245942   # Sea-Blessed Shrine -- summons an object
-246227   # Lightning-Blessed Spire -- summons an object
+119210   # Hearthstone Board, puts down an object
+130158   # Path of Elothir, just a leaf trail
+151343   # Hearthstation, puts down an object
+151344   # Hearthstation, puts down an object
+200198   # Primalist Prison, just a cage
+208433   # Bronze Racer's Pennant
+245942   # Sea-Blessed Shrine, puts down an object
+246227   # Lightning-Blessed Spire, puts down an object

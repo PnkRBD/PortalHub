@@ -1,76 +1,69 @@
-# Appearance-changing toys the DB2 aura scan CANNOT find.
-#
-# These use SPELL_EFFECT_DUMMY / SCRIPT_EFFECT (EffectAura = 0) and do the
-# transform server-side, so there is no EffectAura == 56 row to match on.
-# They have to be listed by hand. Verified by reading each item's "Use:" text.
-#
-# Format: <itemID>   # name -- why it qualifies
-# Blank lines and #-comments are ignored.
+# toys the scan misses, added by hand
 
-54212    # Instant Statue Pedestal -- become a statue of yourself
-86568    # Mr. Smite's Brass Compass -- proc transforms you into a ghost pirate
-86589    # Ai-Li's Skymirror -- copies the target's appearance
-101571   # Moonfang Shroud -- Moonfang's pelt over your head
-103685   # Celestial Defender's Medallion -- guise of a Celestial Defender
-112384   # Reflecting Prism -- swaps appearances with a party member
-116856   # "Blooming Rose" Contender's Costume -- luchador costume
-116888   # "Night Demon" Contender's Costume -- luchador costume
-116889   # "Purple Phantom" Contender's Costume -- luchador costume
-116890   # "Santo's Sun" Contender's Costume -- luchador costume
-116891   # "Snowy Owl" Contender's Costume -- luchador costume
-118244   # Iron Buccaneer's Hat -- Iron Horde swashbuckler disguise
+54212    # Instant Statue Pedestal
+86568    # Mr. Smite's Brass Compass
+86589    # Ai-Li's Skymirror
+101571   # Moonfang Shroud
+103685   # Celestial Defender's Medallion
+112384   # Reflecting Prism
+116856   # "Blooming Rose" Contender's Costume
+116888   # "Night Demon" Contender's Costume
+116889   # "Purple Phantom" Contender's Costume
+116890   # "Santo's Sun" Contender's Costume
+116891   # "Snowy Owl" Contender's Costume
+118244   # Iron Buccaneer's Hat
 119134   # Sargerei Disguise
-120276   # Outrider's Bridle Chain -- Warsong orc disguise
-122304   # Fandral's Seed Pouch -- Druid of the Flame form
-127668   # Jewel of Hellfire -- forehead jewel visual
-127696   # Magic Pet Mirror -- take the appearance of your battle pet
-127709   # Throbbing Blood Orb -- Bleeding Hollow transform
-128310   # Burning Blade -- Burning Blade banner and weaponry
-128462   # Karabor Councilor's Attire -- ceremonial Karabor robes
-128471   # Frostwolf Grunt's Battlegear -- Frostwolf soldier garb
+120276   # Outrider's Bridle Chain
+122304   # Fandral's Seed Pouch
+127668   # Jewel of Hellfire
+127696   # Magic Pet Mirror
+127709   # Throbbing Blood Orb
+128310   # Burning Blade
+128462   # Karabor Councilor's Attire
+128471   # Frostwolf Grunt's Battlegear
 129093   # Ravenbear Disguise
-129149   # Death's Door Charm -- Helheim spirit form
-129938   # Will of Northrend -- vrykul transform
-134019   # Don Carlos' Famous Hat -- hat plus coyote spirit
-134831   # Doomsayer's Robes -- Doomsayer disguise
+129149   # Death's Door Charm
+129938   # Will of Northrend
+134019   # Don Carlos' Famous Hat
+134831   # Doomsayer's Robes
 138900   # Gravil Goldbraid's Famous Sausage Hat
-139337   # Disposable Winter Veil Suits -- dress-up chest (holiday outfits)
-140325   # Home Made Party Mask -- Nightborne party mask
-162642   # Toy Armor Set -- toy armor outfit
-162643   # Toy Armor Set -- toy armor outfit
-163713   # Brazier Cap -- brazier worn on the head
-163736   # Spectral Visage -- spectral appearance
-163738   # Syndicate Mask -- replaces headwear
-163775   # Molok Morion -- stone Molok head
-163924   # Whiskerwax Candle -- candle worn on the head
-165791   # Worn Cloak -- brown cloak and hood
+139337   # Disposable Winter Veil Suits
+140325   # Home Made Party Mask
+162642   # Toy Armor Set
+162643   # Toy Armor Set
+163713   # Brazier Cap
+163736   # Spectral Visage
+163738   # Syndicate Mask
+163775   # Molok Morion
+163924   # Whiskerwax Candle
+165791   # Worn Cloak
 166544   # Dark Ranger's Spare Cowl
-166779   # Transmorpher Beacon -- Ethereal Transmorpher, random appearance
-166790   # Highborne Memento -- possessed by a Highborne spirit
-173951   # N'lyeth, Sliver of N'Zoth -- Shath'Yar form
-173984   # Scroll of Aeons -- echo a newly arrived soul's appearance
-174830   # Shadowy Disguise -- shadowy figure
-174874   # Budget K'thir Disguise -- K'thir on your head
-179393   # Mirror of Envious Dreams -- class-fantasy appearance
-198173   # Atomic Recalibrator -- rearranges genetic composition
-200636   # Primal Invocation Quintessence -- elemental transform
-200707   # Armoire of Endless Cloaks -- Wrathion's cloak collection (transmog)
-200857   # Talisman of Sargha -- random djaradin appearance
-201815   # Cloak of Many Faces -- cosmetic cloak
-202042   # Aquatic Shades -- sunglasses
-202253   # Primal Stave of Claw and Fur -- Winterpelt Furbolg
+166779   # Transmorpher Beacon
+166790   # Highborne Memento
+173951   # N'lyeth, Sliver of N'Zoth
+173984   # Scroll of Aeons
+174830   # Shadowy Disguise
+174874   # Budget K'thir Disguise
+179393   # Mirror of Envious Dreams
+198173   # Atomic Recalibrator
+200636   # Primal Invocation Quintessence
+200707   # Armoire of Endless Cloaks
+200857   # Talisman of Sargha
+201815   # Cloak of Many Faces
+202042   # Aquatic Shades
+202253   # Primal Stave of Claw and Fur
 202283   # Reading Glasses
-206347   # Mannequin Charm -- Trading Post mannequin
-208421   # Compendium of the New Moon -- transform into a giant wolf
-210467   # Magical Murkmorpher -- monument that changes your appearance
-216881   # Duck Disguiser -- transform into a tiny duck
-224783   # Sovereign's Finery Chest -- dress-up chest (transmog)
-226373   # Everlasting Noggenfogger Elixir -- skeleton / shrink / slowfall
-228706   # Rockslidomancer's Stone -- turn into a rock
-231064   # Throwaway Gangster Disguise -- Undermine gangster, Undermine only
-234950   # Atomic Regoblinator -- goblinates the user
+206347   # Mannequin Charm
+208421   # Compendium of the New Moon
+210467   # Magical Murkmorpher
+216881   # Duck Disguiser
+224783   # Sovereign's Finery Chest
+226373   # Everlasting Noggenfogger Elixir
+228706   # Rockslidomancer's Stone
+231064   # Throwaway Gangster Disguise
+234950   # Atomic Regoblinator
 235220   # Fireworks Hat
-244792   # Etheric Brannmorpher -- Ethereal Transmorpher, 1 hour
-245567   # K'aresh Memory Crystal -- take on the appearance of a K'areshi
-246903   # Guise of the Phase Diver -- ethereal energy form
+244792   # Etheric Brannmorpher
+245567   # K'aresh Memory Crystal
+246903   # Guise of the Phase Diver
 279052   # Ancient Amani Mask

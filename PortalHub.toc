@@ -22,10 +22,7 @@ Libs/LibKeystone/LibKeystone.lua
 Data/DungeonPortals.lua
 Data/MagePortals.lua
 Data/Hearths.lua
-# GENERATED - do not hand-edit. Toy IDs/names come from Blizzard's own client data
-# (Toy/ItemEffect/SpellEffect/ItemSparse DB2 tables, pulled as CSV from wago.tools).
-# Regenerate after a patch: bash tools/pull-toys.sh --refresh
-# Add/remove entries via tools/curated-extra.txt and tools/exclude.txt.
+# built by tools/pull-toys.sh, don't edit by hand
 Data/TransmogToys.lua
 
 Helpers.lua

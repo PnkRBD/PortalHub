@@ -1,38 +1,5 @@
 #!/usr/bin/env bash
-#
-# pull-toys.sh -- regenerate Data/TransmogToys.lua from Blizzard's own client data.
-#
-# WHERE THE DATA COMES FROM
-#   Blizzard ships the game's internal database as .db2 files inside the CASC
-#   archives inside your WoW install. wago.tools extracts those every build and
-#   publishes them as plain CSV over HTTP -- no account, no API key, no scraping.
-#   This script downloads five of those tables and joins them locally:
-#
-#     Toy              -> every item that is a toy
-#     ItemXItemEffect  -> item  -> item-effect link
-#     ItemEffect       -> item-effect -> spell
-#     SpellEffect      -> spell -> aura type (56 = TRANSFORM, 61 = MOD_SCALE)
-#     ItemSparse       -> item  -> display name
-#
-#   A toy is kept if any of its spells -- or a spell it triggers, up to two hops
-#   -- applies aura 56 or 61.
-#
-# LIMITS (read these before trusting the output)
-#   * ~30 well-known appearance toys apply their transform from a server-side
-#     script effect (EffectAura = 0). No amount of DB2 joining will find them.
-#     They live in tools/curated-extra.txt and are merged in by hand.
-#   * The reverse: some aura-56 toys are novelty junk. tools/exclude.txt wins.
-#   * wago.tools serves whatever the newest build is, which during a PTR cycle
-#     can include unreleased items. Harmless here -- PlayerHasToy() just returns
-#     false -- but do not treat a new ID as proof the toy is obtainable.
-#
-# USAGE
-#   bash tools/pull-toys.sh              # use cached CSVs if present
-#   bash tools/pull-toys.sh --refresh    # force re-download (do this after a patch)
-#   bash tools/pull-toys.sh --dry-run    # report the diff, write nothing
-#   bash tools/pull-toys.sh --clean      # delete the ~110 MB CSV cache
-#
-#   Needs: bash, curl, awk. Cache lives in $TMPDIR, not in the addon folder.
+# rebuilds Data/TransmogToys.lua from wago.tools, run with --refresh after a patch
 
 set -euo pipefail
 
@@ -40,8 +7,6 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ADDON="$(dirname "$HERE")"
 OUT="$ADDON/Data/TransmogToys.lua"
 
-# ~110 MB of CSVs. Kept OUT of the addon folder so it never ends up in a backup
-# zip or gets scanned at game launch. Override with $PORTALHUB_DB2CACHE.
 CACHE="${PORTALHUB_DB2CACHE:-${TMPDIR:-${TEMP:-/tmp}}/portalhub-db2}"
 
 REFRESH=0
@@ -51,7 +16,7 @@ for a in "$@"; do
     --refresh) REFRESH=1 ;;
     --dry-run) DRYRUN=1 ;;
     --clean)   rm -rf "$CACHE"; echo "removed $CACHE"; exit 0 ;;
-    -h|--help) sed -n '2,45p' "${BASH_SOURCE[0]}"; exit 0 ;;
+    -h|--help) echo "usage: bash tools/pull-toys.sh [--refresh] [--dry-run] [--clean]"; exit 0 ;;
     *) echo "unknown option: $a" >&2; exit 2 ;;
   esac
 done
@@ -60,7 +25,7 @@ mkdir -p "$CACHE"
 
 fetch() {
   local table="$1"
-  local dest="$CACHE/$table.csv"   # separate statement: $table isn't set yet on the line above
+  local dest="$CACHE/$table.csv"
   if [[ $REFRESH -eq 1 || ! -s "$dest" ]]; then
     echo "  downloading $table ..." >&2
     curl -fsSL "https://wago.tools/db2/$table/csv" -o "$dest"
@@ -72,14 +37,10 @@ fetch() {
 echo "==> fetching DB2 tables from wago.tools" >&2
 for t in Toy ItemXItemEffect ItemEffect SpellEffect ItemSparse; do fetch "$t"; done
 
-# Record which build these CSVs came from, so the generated file is traceable.
 BUILD="$(curl -fsSI "https://wago.tools/db2/Toy/csv" \
          | sed -n 's/.*filename="Toy\.\([0-9.]*\)\.csv".*/\1/p' | head -1)"
 BUILD="${BUILD:-unknown}"
 
-# --- column lookup -----------------------------------------------------------
-# Header names are read at runtime so a wago.tools column reorder doesn't
-# silently produce garbage.
 colidx() { head -1 "$CACHE/$1.csv" | tr -d '\r' | tr ',' '\n' | grep -nx "$2" | cut -d: -f1; }
 colcount() { head -1 "$CACHE/$1.csv" | tr -d '\r' | tr ',' '\n' | wc -l; }
 
@@ -94,13 +55,12 @@ IS_NAME=$(colidx ItemSparse Display_lang)
 for v in TOY_ITEMID IXIE_EFFID IXIE_ITEMID IE_ID IE_SPELL SE_AURA SE_TRIG SE_SPELL IS_NAME; do
   [[ -n "${!v}" ]] || { echo "FATAL: could not locate column for $v -- wago.tools schema changed" >&2; exit 1; }
 done
-# Toy.csv's first column is a quoted string that contains commas, so index the
-# ItemID column from the END of the row instead of the start.
+
+# first column has commas in it, so count from the end
 TOY_FROM_END=$(( TOY_N - TOY_ITEMID ))
 
 echo "==> joining (build $BUILD)" >&2
 
-# --- 1. toys whose spell chain applies aura 56 (TRANSFORM) or 61 (MOD_SCALE) --
 awk -F, \
     -v toyend="$TOY_FROM_END" -v ieid="$IE_ID" -v iesp="$IE_SPELL" \
     -v xeff="$IXIE_EFFID" -v xitem="$IXIE_ITEMID" \
@@ -121,10 +81,10 @@ END {
     m=split(itemspell[it],sp," "); hit=0; scale=0
     for (i=1;i<=m;i++) {
       marks(sp[i])
-      k=split(tr[sp[i]],t2," ")                    # hop 1: triggered spell
+      k=split(tr[sp[i]],t2," ")
       for (j=1;j<=k;j++) {
         marks(t2[j])
-        k2=split(tr[t2[j]],t3," ")                 # hop 2: triggered-triggered
+        k2=split(tr[t2[j]],t3," ")
         for (q=1;q<=k2;q++) marks(t3[q])
       }
     }
@@ -133,17 +93,13 @@ END {
 }' "$CACHE/Toy.csv" "$CACHE/ItemEffect.csv" "$CACHE/ItemXItemEffect.csv" "$CACHE/SpellEffect.csv" \
   | sort -u > "$CACHE/scan.ids"
 
-# --- 2. merge curated additions, drop exclusions ------------------------------
-# NB: every set here is sorted LEXICALLY, not numerically -- comm(1) compares
-# strings, and a -n sorted file makes it emit "input is not in sorted order"
-# and silently produce wrong results. Numeric ordering is applied at the end.
 strip() { sed 's/#.*//' "$1" | tr -d ' \t\r' | grep -E '^[0-9]+$' || true; }
+# comm needs a plain sort here, not -n
 strip "$HERE/curated-extra.txt" | sort -u > "$CACHE/extra.ids"
 strip "$HERE/exclude.txt"       | sort -u > "$CACHE/exclude.ids"
 sort -u "$CACHE/scan.ids" "$CACHE/extra.ids" \
   | comm -23 - "$CACHE/exclude.ids" > "$CACHE/final.ids"
 
-# --- 3. resolve names from ItemSparse (proper quoted-CSV parse) ---------------
 awk -v namecol="$IS_NAME" '
 function csvfield(line, want,   i,n,f,inq,c,out) {
   n=length(line); f=1; inq=0; out=""
@@ -172,14 +128,6 @@ if [[ "$WANT" -ne "$GOT" ]]; then
   comm -23 "$CACHE/final.ids" <(cut -f1 "$CACHE/final.tsv" | sort -u) | sed 's/^/    /' >&2
 fi
 
-# A name containing " or \ would break the generated Lua. Fail loudly instead.
-if grep -q '["\\]' "$CACHE/final.tsv"; then
-  echo "FATAL: an item name contains a quote or backslash; escape it before writing Lua" >&2
-  grep -n '["\\]' "$CACHE/final.tsv" >&2
-  exit 1
-fi
-
-# --- 4. report the diff against what is currently shipped ---------------------
 if [[ -f "$OUT" ]]; then
   grep -o 'id = [0-9]*' "$OUT" | grep -o '[0-9]*' | sort -u > "$CACHE/old.ids"
   cut -f1 "$CACHE/final.tsv" | sort -u > "$CACHE/new.ids"
@@ -195,14 +143,9 @@ if [[ $DRYRUN -eq 1 ]]; then
   exit 0
 fi
 
-# --- 5. emit the Lua ---------------------------------------------------------
 [[ -f "$OUT" ]] && cp "$OUT" "$OUT.bak"
 {
   printf 'local _, PH = ...\n\n'
-  printf -- '-- Appearance-changing toys. GENERATED by tools/pull-toys.sh -- do not hand-edit.\n'
-  printf -- '-- Source: wago.tools DB2 export, build %s.\n' "$BUILD"
-  printf -- '-- Add or remove entries via tools/curated-extra.txt and tools/exclude.txt,\n'
-  printf -- '-- then re-run: bash tools/pull-toys.sh --refresh\n\n'
   printf 'PH.TransmogToys = {\n'
   awk -F'\t' '{gsub(/\\/, "\\\\", $2); gsub(/"/, "\\\"", $2); printf "    { id = %s, name = \"%s\" },\n", $1, $2}' "$CACHE/final.tsv"
   printf '}\n'
