@@ -3,7 +3,7 @@
 ## Title: PortalHub
 ## Notes: Portal buttons for M+ teleports, mage portals, hearthstones, and transmog toys.
 ## Author: BluAddons
-## Version: 2.1
+## Version: 2.2
 ## X-Curse-Project-ID: 1372527
 ## IconTexture: Interface\AddOns\PortalHub\Media\portalhub_icon
 ## SavedVariables: PortalHubDB
