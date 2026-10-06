@@ -52,7 +52,6 @@
 201815   # Cloak of Many Faces
 202042   # Aquatic Shades
 202253   # Primal Stave of Claw and Fur
-202283   # Reading Glasses
 206347   # Mannequin Charm
 208421   # Compendium of the New Moon
 210467   # Magical Murkmorpher

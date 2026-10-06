@@ -166,7 +166,6 @@ PH.TransmogToys = {
     { id = 201815, name = "Cloak of Many Faces" },
     { id = 202042, name = "Aquatic Shades" },
     { id = 202253, name = "Primal Stave of Claw and Fur" },
-    { id = 202283, name = "Reading Glasses" },
     { id = 203734, name = "Snow Blanket" },
     { id = 203852, name = "Spore-Bound Essence" },
     { id = 205904, name = "Vibrant Clacking Claw" },
