@@ -58,7 +58,9 @@ end
 local function BuildHouseButton(parent, title)
     local button = CreateFrame("Button", "PortalHubHouseButton", parent, "SecureActionButtonTemplate")
     button:SetSize(20, 20)
-    button:SetPoint("LEFT", title, "RIGHT", 4, 0)
+    parent:HookScript("OnShow", function()
+        button:SetPoint("TOPLEFT", parent, "TOPLEFT", 16 + title:GetStringWidth() + 4, -12)
+    end)
     button:RegisterForClicks("LeftButtonUp")
     button:SetAttribute("useOnKeyDown", false)
 
