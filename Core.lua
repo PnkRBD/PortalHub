@@ -482,6 +482,7 @@ loginFrame:SetScript("OnEvent", function(self)
     PortalHubDB.keybind = PortalHubDB.keybind or "NONE"
     PortalHubDB.favorites = PortalHubDB.favorites or {}
     PortalHubDB.recents = PortalHubDB.recents or {}
+    PortalHubDB.usedNew = PortalHubDB.usedNew or {}
     PortalHubDB.customToys = PortalHubDB.customToys or {}
     PortalHubDB.customHearths = PortalHubDB.customHearths or {}
     PortalHubDB.hiddenTabs = PortalHubDB.hiddenTabs or {}

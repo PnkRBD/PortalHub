@@ -24,6 +24,7 @@ Data/MagePortals.lua
 Data/Hearths.lua
 # built by tools/pull-toys.sh, don't edit by hand
 Data/TransmogToys.lua
+Data/New.lua
 
 Helpers.lua
 

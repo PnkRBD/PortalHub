@@ -68,6 +68,7 @@ function PH.HearthsTab.Build(parent)
             if not self._owned then return end
             PH.FlashRow(self)
             PH.RecordUse(self._entryID, self._name, self._entryType, "hearths")
+            self._label:SetText(self._name)
         end)
         return row
     end
@@ -89,7 +90,7 @@ function PH.HearthsTab.Build(parent)
         for _, entry in ipairs(CollectAvailable()) do
             local row = AcquireRow()
             row._iconTex:SetTexture(PH.GetItemIcon(entry.id))
-            row._label:SetText(entry.name)
+            row._label:SetText(entry.owned and PH.LabelText(entry.id, entry.name) or entry.name)
             row._name = entry.name
             row._entryID = entry.id
             row._entryType = entry.type

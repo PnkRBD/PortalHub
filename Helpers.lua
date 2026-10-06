@@ -30,6 +30,7 @@ local MAX_RECENTS = 10
 local FALLBACK_SPELL_ICON = 136243
 local ICON_BORDER_BACKDROP = { edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = 1 }
 local STAR_PATH = [[Interface\AddOns\PortalHub\Media\favorite_star]]
+local NEW_TAG = "  |cff19ff19NEW|r"
 
 PH.ROW_SPACING = ROW_SPACING
 PH.ICON_SIZE = ICON_SIZE
@@ -112,7 +113,15 @@ function PH.ToggleFavorite(id)
     end
 end
 
+function PH.LabelText(id, name)
+    if PH.NewEntries[id] and not PortalHubDB.usedNew[id] then
+        return name .. NEW_TAG
+    end
+    return name
+end
+
 function PH.RecordUse(id, name, action, tab)
+    if PH.NewEntries[id] then PortalHubDB.usedNew[id] = true end
     local recents = PortalHubDB.recents
     for i = #recents, 1, -1 do
         if recents[i].id == id then table.remove(recents, i) end
