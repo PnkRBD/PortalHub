@@ -6,13 +6,10 @@ local T = UI.Colors
 local unpack = unpack
 
 local MENU_ROW_HEIGHT = 22
+local MENU_MAX_VISIBLE = 10
 
-function Controls.Dropdown(parent, _label, items, selected, callback, _tooltip, width, maxVisible)
-    width = width or 200
-    maxVisible = maxVisible or 10
-    items = items or {}
-    if selected == nil then selected = items[1] end
-    local state = { value = selected, items = items }
+function Controls.Dropdown(parent, items, selected, callback, width)
+    local value = selected
 
     local container = CreateFrame("Frame", nil, parent)
     container:SetSize(width, UI.ROW_HEIGHT)
@@ -30,15 +27,13 @@ function Controls.Dropdown(parent, _label, items, selected, callback, _tooltip, 
     btnText:SetPoint("RIGHT", -25, 0)
     btnText:SetJustifyH("LEFT")
     btnText:SetTextColor(unpack(T.text.secondary))
+    btnText:SetText(value)
 
     local expandIcon = btn:CreateFontString(nil, "OVERLAY")
     expandIcon:SetFont(UI.Font, 14, "")
     expandIcon:SetPoint("RIGHT", -10, 0)
     expandIcon:SetText("+")
-    do
-        local ar, ag, ab = UI.GetAccent()
-        expandIcon:SetTextColor(ar, ag, ab, 1)
-    end
+    expandIcon:SetTextColor(UI.GetAccent())
 
     local menu = UI.NewFrame(UIParent, { bg = T.bg.dark, border = T.border.light, width = width, height = 100 })
     menu:SetFrameStrata("FULLSCREEN_DIALOG")
@@ -80,16 +75,11 @@ function Controls.Dropdown(parent, _label, items, selected, callback, _tooltip, 
     local function PositionMenu()
         menu:ClearAllPoints()
         local bottom = btn:GetBottom()
-        local mh = menu:GetHeight() or 100
-        if not bottom or bottom < mh + 50 then
+        if not bottom or bottom < menu:GetHeight() + 50 then
             menu:SetPoint("BOTTOMLEFT", btn, "TOPLEFT", 0, 2)
         else
             menu:SetPoint("TOPLEFT", btn, "BOTTOMLEFT", 0, -2)
         end
-    end
-
-    local function UpdateButtonDisplay()
-        btnText:SetText(state.value or "")
     end
 
     local rowPool = {}
@@ -140,27 +130,27 @@ function Controls.Dropdown(parent, _label, items, selected, callback, _tooltip, 
         local mw = btn:GetWidth()
         menu:SetWidth(mw)
         scrollChild:SetWidth(mw - 4)
-        for i, val in ipairs(state.items) do
+        for i, val in ipairs(items) do
             local row = GetRow(i)
             row:SetPoint("TOPLEFT", 0, -y)
             row:SetPoint("TOPRIGHT", 0, -y)
             row.text:SetText(val)
-            local isSelected = val == state.value
+            local isSelected = val == value
             row._selected = isSelected
             row.hl:SetShown(isSelected)
             row.text:SetTextColor(unpack(isSelected and T.text.primary or T.text.secondary))
             row:SetScript("OnClick", function()
-                state.value = val
-                UpdateButtonDisplay()
+                value = val
+                btnText:SetText(value)
                 CloseMenu()
-                if callback then callback(val) end
+                callback(val)
             end)
             y = y + MENU_ROW_HEIGHT
         end
         scrollChild:SetHeight(y)
-        menu:SetHeight(math.min(#state.items, maxVisible) * MENU_ROW_HEIGHT + 8)
+        menu:SetHeight(math.min(#items, MENU_MAX_VISIBLE) * MENU_ROW_HEIGHT + 8)
         scrollFrame:SetVerticalScroll(0)
-        UI.Defer(scrollLogic.UpdateThumb)
+        C_Timer.After(0, scrollLogic.UpdateThumb)
     end
 
     btn:SetScript("OnClick", function()
@@ -192,11 +182,5 @@ function Controls.Dropdown(parent, _label, items, selected, callback, _tooltip, 
     end)
     menu:SetScript("OnHide", function() checkFrame:Hide() end)
 
-    UpdateButtonDisplay()
-    function container:GetValue() return state.value end
-    function container:SetValue(val)
-        state.value = val
-        UpdateButtonDisplay()
-    end
     return container
 end

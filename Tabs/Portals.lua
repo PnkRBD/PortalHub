@@ -21,13 +21,10 @@ function PH.PortalsTab.Build(parent)
 
     local expansionItems = {}
     for _, expName in ipairs(data.expansionOrder) do
-        local dungeons = data.expansions[expName]
-        if dungeons then
-            for _, entry in ipairs(dungeons) do
-                if PH.EntryAvailable(entry) then
-                    expansionItems[#expansionItems + 1] = expName
-                    break
-                end
+        for _, entry in ipairs(data.expansions[expName]) do
+            if PH.EntryAvailable(entry) then
+                expansionItems[#expansionItems + 1] = expName
+                break
             end
         end
     end
@@ -55,9 +52,8 @@ function PH.PortalsTab.Build(parent)
     local function CollectEntries()
         local query = currentSearch:lower()
         if query == "" then
-            local src = data.expansions[selectedExpansion] or {}
             local entries = {}
-            for _, entry in ipairs(src) do
+            for _, entry in ipairs(data.expansions[selectedExpansion]) do
                 if PH.EntryAvailable(entry) then
                     entries[#entries + 1] = entry
                 end
@@ -68,15 +64,12 @@ function PH.PortalsTab.Build(parent)
         local entries = {}
         local seen = {}
         for _, expName in ipairs(data.expansionOrder) do
-            local dungeons = data.expansions[expName]
-            if dungeons then
-                for _, entry in ipairs(dungeons) do
-                    local key = PH.SelectSpellID(entry) or entry.name
-                    if not seen[key] and PH.EntryAvailable(entry)
-                        and entry.name:lower():find(query, 1, true) then
-                        seen[key] = true
-                        entries[#entries + 1] = entry
-                    end
+            for _, entry in ipairs(data.expansions[expName]) do
+                local key = PH.SelectSpellID(entry) or entry.name
+                if not seen[key] and PH.EntryAvailable(entry)
+                    and entry.name:lower():find(query, 1, true) then
+                    seen[key] = true
+                    entries[#entries + 1] = entry
                 end
             end
         end
@@ -91,9 +84,8 @@ function PH.PortalsTab.Build(parent)
         local entries = CollectEntries()
 
         table_sort(entries, function(a, b)
-            local aID, bID = PH.SelectSpellID(a), PH.SelectSpellID(b)
-            local aFav = aID and PH.IsFavorite(aID)
-            local bFav = bID and PH.IsFavorite(bID)
+            local aFav = PH.IsFavorite(PH.SelectSpellID(a))
+            local bFav = PH.IsFavorite(PH.SelectSpellID(b))
             if aFav ~= bFav then return aFav end
             return a.name < b.name
         end)
@@ -104,7 +96,7 @@ function PH.PortalsTab.Build(parent)
             local learned = PH.IsKnown(spellID)
             local row = pool.Acquire()
 
-            row._iconTex:SetTexture(entry.icon or C_Spell_GetSpellTexture(spellID) or PH.FALLBACK_SPELL_ICON)
+            row._iconTex:SetTexture(C_Spell_GetSpellTexture(spellID) or PH.FALLBACK_SPELL_ICON)
             row._label:SetText(entry.name)
             row._timerText:SetText("")
             row._name = entry.name
@@ -136,16 +128,16 @@ function PH.PortalsTab.Build(parent)
     end
 
     local searchBox = Controls.SearchBox(parent, "Search portals...", function(text)
-        currentSearch = text or ""
+        currentSearch = text
         Refresh()
     end, CONTROL_WIDTH)
 
-    local dropdown = Controls.Dropdown(parent, nil, expansionItems, selectedExpansion, function(val)
+    local dropdown = Controls.Dropdown(parent, expansionItems, selectedExpansion, function(val)
         selectedExpansion = val
         currentSearch = ""
         searchBox:SetValue("")
         Refresh()
-    end, nil, CONTROL_WIDTH)
+    end, CONTROL_WIDTH)
     dropdown:SetPoint("TOPLEFT", 0, 0)
 
     searchBox:SetPoint("LEFT", dropdown, "RIGHT", CONTROL_GAP, 0)

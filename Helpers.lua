@@ -39,7 +39,6 @@ PH.STAR_PATH = STAR_PATH
 PH.FALLBACK_SPELL_ICON = FALLBACK_SPELL_ICON
 
 function PH.SelectSpellID(entry)
-    if not entry then return nil end
     if entry.spellIDs then
         local fallback
         for _, id in ipairs(entry.spellIDs) do
@@ -123,7 +122,6 @@ function PH.RecordUse(id, name, action, tab)
 end
 
 local function FormatCooldownText(start, duration)
-    if not start or not duration or duration <= 0 then return "" end
     local remaining = (start + duration) - GetTime()
     if remaining <= 0 then return "" end
     if remaining >= 3600 then
@@ -135,7 +133,7 @@ local function FormatCooldownText(start, duration)
 end
 
 local function ApplyCooldownTime(cooldownFrame, start, duration, timerText)
-    if start and duration and duration > GCD_THRESHOLD then
+    if duration > GCD_THRESHOLD then
         cooldownFrame:SetCooldown(start, duration)
         if timerText then timerText:SetText(FormatCooldownText(start, duration)) end
     else
@@ -145,13 +143,11 @@ local function ApplyCooldownTime(cooldownFrame, start, duration, timerText)
 end
 
 function PH.ApplyCooldown(cooldownFrame, spellID)
-    if not spellID or not cooldownFrame then return end
     local info = C_Spell_GetSpellCooldown(spellID)
-    ApplyCooldownTime(cooldownFrame, info and info.startTime, info and info.duration)
+    ApplyCooldownTime(cooldownFrame, info.startTime, info.duration)
 end
 
 function PH.ApplyItemCooldown(row)
-    if not row._itemID then return end
     local start, duration = C_Item_GetItemCooldown(row._itemID)
     ApplyCooldownTime(row._cooldown, start, duration, row._timerText)
 end
@@ -165,8 +161,8 @@ function PH.SetRowAvailable(row, isAvailable)
         row._iconTex:SetDesaturated(true)
         row._iconTex:SetAlpha(0.4)
         row._label:SetTextColor(unpack(Colors.text.disabled))
-        if row._cooldown then row._cooldown:Clear() end
-        if row._timerText then row._timerText:SetText("") end
+        row._cooldown:Clear()
+        row._timerText:SetText("")
         if row._star then row._star:Hide() end
         PH.SafeSetAttr(row, "type", nil)
     end
@@ -210,8 +206,6 @@ end
 function PH.SetupRowBase(parent)
     local row = CreateFrame("Button", nil, parent, "SecureActionButtonTemplate")
     row:SetHeight(ROW_HEIGHT)
-    row:SetPoint("TOPLEFT", parent, "TOPLEFT")
-    row:SetPoint("TOPRIGHT", parent, "TOPRIGHT")
 
     local hoverBg = row:CreateTexture(nil, "BACKGROUND")
     hoverBg:SetAllPoints()
@@ -269,15 +263,10 @@ function PH.SetupItemRow(scrollChild)
     row._cooldown:SetHideCountdownNumbers(false)
 
     C_Timer_After(0, function()
-        for i = 1, row._cooldown:GetNumRegions() do
-            local region = select(i, row._cooldown:GetRegions())
-            if region and region:GetObjectType() == "FontString" then
-                region:ClearAllPoints()
-                region:SetPoint("CENTER", row._cooldown, "CENTER", 0, 0)
-                region:SetFont(UI.Font, 12, "OUTLINE")
-                break
-            end
-        end
+        local countdown = row._cooldown:GetCountdownFontString()
+        countdown:ClearAllPoints()
+        countdown:SetPoint("CENTER", row._cooldown, "CENTER", 0, 0)
+        countdown:SetFont(UI.Font, 12, "OUTLINE")
     end)
 
     row._label = row:CreateFontString(nil, "OVERLAY")
@@ -365,13 +354,6 @@ end
 
 local CARD_ICON_SIZE = 36
 
-local KEYSTONE_CARD_BACKDROP = {
-    bgFile = "Interface\\Buttons\\WHITE8x8",
-    edgeFile = "Interface\\Buttons\\WHITE8x8",
-    edgeSize = 1,
-    insets = { left = 1, right = 1, top = 1, bottom = 1 },
-}
-
 local ROLE_ATLAS = {
     TANK    = "roleicon-tank",
     HEALER  = "roleicon-healer",
@@ -383,20 +365,18 @@ PH.KEYSTONE_CARD_GAP = 6
 PH.NEUTRAL_CLASS_COLOR = { r = 0.7, g = 0.7, b = 0.7 }
 
 local function GetScoreColor(score)
-    if not score or score <= 0 then return nil end
     if RaiderIO and RaiderIO.GetScoreColor then
         local r, g, b = RaiderIO.GetScoreColor(score)
         if r then return r, g, b end
     end
     local color = C_ChallengeMode.GetDungeonScoreRarityColor(score)
     if color then return color.r, color.g, color.b end
-    return nil
 end
 
 function PH.CreateKeystoneCard(parent)
     local card = CreateFrame("Button", nil, parent, "SecureActionButtonTemplate, BackdropTemplate")
     card:SetHeight(PH.KEYSTONE_CARD_HEIGHT)
-    card:SetBackdrop(KEYSTONE_CARD_BACKDROP)
+    card:SetBackdrop(UI.BACKDROP)
     card:SetBackdropColor(unpack(Colors.bg.light))
     card:SetBackdropBorderColor(unpack(Colors.border.dark))
 
@@ -496,8 +476,7 @@ function PH.PopulateKeystoneCard(card, info)
     end
 
     if hasPortal then
-        local r, g, b = Colors.GetAccent()
-        card._accentLine:SetColorTexture(r, g, b, 1)
+        card._accentLine:SetColorTexture(UI.GetAccent())
         card._accentLine:Show()
     else
         card._accentLine:Hide()
@@ -518,7 +497,7 @@ function PH.PopulateKeystoneCard(card, info)
         card._textAnchor:SetPoint("LEFT", card, "LEFT", 12, 0)
     end
 
-    local score = info.rating or 0
+    local score = info.rating
     card._ratingText:SetText(format("%d", score))
     if score > 0 then
         local r, g, b = GetScoreColor(score)
@@ -551,12 +530,10 @@ end
 
 function PH.FlashRow(row)
     UI.CastTracker.MarkPending(row)
-    row._flashR, row._flashG, row._flashB = Colors.GetAccent()
+    row._flashR, row._flashG, row._flashB = UI.GetAccent()
     row._flashStart = GetTime()
     row:SetScript("OnUpdate", FlashOnUpdate)
 end
-
-PH.StopCastBar = UI.CastTracker.Stop
 
 function PH.CreateScrollArea(parent)
     local SCROLLBAR_WIDTH = 6
@@ -580,7 +557,7 @@ function PH.CreateScrollArea(parent)
     local function SyncWidth()
         if InCombatLockdown() then return end
         local w = scroll:GetWidth()
-        if w and w > 0 then child:SetWidth(w) end
+        if w > 0 then child:SetWidth(w) end
     end
     C_Timer_After(0, SyncWidth)
     scroll:HookScript("OnSizeChanged", SyncWidth)
@@ -957,7 +934,7 @@ function PH.BuildToyAddOverlay(parent, store, refreshFn)
         resultPool.ReleaseAll()
         statusText:Hide()
 
-        if not text or text == "" then
+        if text == "" then
             resultChild:SetHeight(1)
             resultUpdateThumb()
             return
@@ -1026,17 +1003,12 @@ function PH.BuildToyAddOverlay(parent, store, refreshFn)
         PH.FinishScrollLayout(resultChild, resultScroll, resultUpdateThumb, y)
     end
 
-    local searchPending = false
+    local QueueSearch = PH.Throttle(0.3, function() SearchToys(searchInput:GetText()) end)
 
     searchInput:SetScript("OnTextChanged", function(self, userInput)
         if not userInput then return end
         if self:GetText() == "" then placeholder:Show() else placeholder:Hide() end
-        if searchPending then return end
-        searchPending = true
-        C_Timer_After(0.3, function()
-            searchPending = false
-            SearchToys(searchInput:GetText())
-        end)
+        QueueSearch()
     end)
 
     searchInput:SetScript("OnEnterPressed", function(self) SearchToys(self:GetText()) end)

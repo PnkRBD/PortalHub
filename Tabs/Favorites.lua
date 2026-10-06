@@ -24,17 +24,14 @@ local function CollectFavorites()
     local dungeonData = PH.DungeonPortalData
 
     for _, expName in ipairs(dungeonData.expansionOrder) do
-        local dungeons = dungeonData.expansions[expName]
-        if dungeons then
-            for _, entry in ipairs(dungeons) do
-                local spellID = PH.SelectSpellID(entry)
-                if spellID and favs[spellID] and not seen[spellID] and IsPlayerSpell(spellID) then
-                    seen[spellID] = true
-                    results[#results + 1] = {
-                        id = spellID, favKey = spellID, name = entry.name,
-                        action = "spell", tab = "portals",
-                    }
-                end
+        for _, entry in ipairs(dungeonData.expansions[expName]) do
+            local spellID = PH.SelectSpellID(entry)
+            if spellID and favs[spellID] and not seen[spellID] and IsPlayerSpell(spellID) then
+                seen[spellID] = true
+                results[#results + 1] = {
+                    id = spellID, favKey = spellID, name = entry.name,
+                    action = "spell", tab = "portals",
+                }
             end
         end
     end
@@ -107,7 +104,6 @@ local function CollectRecents()
     local results = {}
     local favs = PortalHubDB.favorites
     for _, entry in ipairs(PortalHubDB.recents) do
-        if #results >= 10 then break end
         if not favs[entry.id] then
             local available
             if entry.action == "spell" then
@@ -239,6 +235,12 @@ function PH.FavoritesTab.Build(parent)
             button:SetNormalTexture(PH.STAR_PATH)
             button:GetNormalTexture():SetVertexColor(1, 0.82, 0, 1)
             button:SetFrameLevel(row:GetFrameLevel() + 5)
+            button:SetScript("OnEnter", function(self)
+                self:GetNormalTexture():SetVertexColor(1, 0.4, 0.4, 1)
+            end)
+            button:SetScript("OnLeave", function(self)
+                self:GetNormalTexture():SetVertexColor(1, 0.82, 0, 1)
+            end)
             row._unfavBtn = button
         end
 
@@ -250,12 +252,6 @@ function PH.FavoritesTab.Build(parent)
         button:SetScript("OnClick", function()
             PH.ToggleFavorite(favKey)
             refreshFn()
-        end)
-        button:SetScript("OnEnter", function(self)
-            self:GetNormalTexture():SetVertexColor(1, 0.4, 0.4, 1)
-        end)
-        button:SetScript("OnLeave", function(self)
-            self:GetNormalTexture():SetVertexColor(1, 0.82, 0, 1)
         end)
     end
 

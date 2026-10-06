@@ -92,16 +92,10 @@ local function BuildHouseButton(parent, title)
         PH.RecordUse(HOUSING_SPELL_ID, "Teleport Home", "spell", "housing")
     end)
 
-    if not (C_Housing and C_Housing.GetPlayerOwnedHouses) then
-        button:Hide()
-        return
-    end
-
     local pendingHouse
     local combatWatcher = CreateFrame("Frame")
 
     local function ApplyHouse(house)
-        if InCombatLockdown() then return end
         button:SetAttribute("type", nil)
         button:SetAttribute("house-neighborhood-guid", nil)
         button:SetAttribute("house-guid", nil)
@@ -190,9 +184,8 @@ local function BuildPanel()
     local content = CreateFrame("Frame", nil, panel)
     content:SetPoint("TOPLEFT", 16, -52)
     content:SetPoint("BOTTOMRIGHT", -16, 20)
-    panel.content = content
 
-    local version = C_AddOns.GetAddOnMetadata("PortalHub", "Version") or ""
+    local version = C_AddOns.GetAddOnMetadata("PortalHub", "Version")
     local versionText = panel:CreateFontString(nil, "OVERLAY")
     versionText:SetFont(UI.Font, 12, "")
     versionText:SetPoint("BOTTOMLEFT", 12, 8)
@@ -284,7 +277,7 @@ local function BuildPanel()
         isShown = false
         PH.StopTracking()
         PH.StopItemTracking()
-        PH.StopCastBar()
+        UI.CastTracker.Stop()
     end)
 end
 
@@ -362,7 +355,7 @@ function PH.CheckPortalData()
 
     local missing, seen = 0, {}
     for _, expName in ipairs(data.expansionOrder) do
-        for _, entry in ipairs(data.expansions[expName] or {}) do
+        for _, entry in ipairs(data.expansions[expName]) do
             local spellID = PH.SelectSpellID(entry)
             if spellID and not seen[spellID] then
                 seen[spellID] = true
@@ -377,19 +370,16 @@ function PH.CheckPortalData()
         print("  all portal spells exist in this client")
     end
 
-    local newest = data.seasons and data.seasons[1]
-    if newest then
-        local active = data.expansions["Current Season"] == newest.dungeons
-        if active then
-            print("  Current Season = newest lineup; entries resolve to:")
-        else
-            print("  newest season lineup (|cffffaa00gated off on this client|r) resolves to:")
-        end
-        for _, entry in ipairs(newest.dungeons) do
-            local spellID = PH.SelectSpellID(entry)
-            local name = spellID and C_Spell.GetSpellName(spellID)
-            print(format("    %s -> %s", entry.name, name or "|cffff4444(missing)|r"))
-        end
+    local newest = data.seasons[1]
+    if data.expansions["Current Season"] == newest.dungeons then
+        print("  Current Season = newest lineup; entries resolve to:")
+    else
+        print("  newest season lineup (|cffffaa00gated off on this client|r) resolves to:")
+    end
+    for _, entry in ipairs(newest.dungeons) do
+        local spellID = PH.SelectSpellID(entry)
+        local name = spellID and C_Spell.GetSpellName(spellID)
+        print(format("    %s -> %s", entry.name, name or "|cffff4444(missing)|r"))
     end
 end
 
@@ -435,7 +425,7 @@ eventFrame:SetScript("OnEvent", function(_, event) refreshHandlers[event]() end)
 local announceFrame = CreateFrame("Frame")
 announceFrame:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 announceFrame:SetScript("OnEvent", function(_, _, _, _, spellID)
-    if not (PortalHubDB and PortalHubDB.announce and spellID and portalSpellNames[spellID]) then return end
+    if not (PortalHubDB.announce and portalSpellNames[spellID]) then return end
     local channel = IsInRaid() and "RAID" or IsInGroup() and "PARTY"
     if channel then
         SendChatMessage("Portal: " .. portalSpellNames[spellID], channel)

@@ -30,14 +30,10 @@ local function BuildPortalLookup()
     portalLookup = {}
     local data = PH.DungeonPortalData
     for _, expName in ipairs(data.expansionOrder) do
-        local dungeons = data.expansions[expName]
-        if dungeons then
-            for _, entry in ipairs(dungeons) do
-                local spellID = PH.SelectSpellID(entry)
-                local key = entry.name:lower()
-                if spellID and PH.EntryAvailable(entry) and not portalLookup[key] then
-                    portalLookup[key] = spellID
-                end
+        for _, entry in ipairs(data.expansions[expName]) do
+            local key = entry.name:lower()
+            if not portalLookup[key] and PH.EntryAvailable(entry) then
+                portalLookup[key] = PH.SelectSpellID(entry)
             end
         end
     end
@@ -45,7 +41,6 @@ end
 
 local function FindPortalSpell(dungeonName)
     if not portalLookup then BuildPortalLookup() end
-    if not dungeonName then return nil end
     local low = dungeonName:lower()
     if portalLookup[low] then return portalLookup[low] end
     for portalName, spellID in pairs(portalLookup) do
@@ -53,7 +48,6 @@ local function FindPortalSpell(dungeonName)
             return spellID
         end
     end
-    return nil
 end
 
 local function GetRIOScore(unit)
@@ -108,13 +102,13 @@ end
 
 local function GetMemberInfo(unit)
     local info = { unit = unit }
-    info.name = UnitName(unit) or "?"
+    info.name = UnitName(unit)
     info.connected = UnitIsConnected(unit)
     info.dead = UnitIsDeadOrGhost(unit)
 
     local _, classToken = UnitClass(unit)
     info.classColor = (classToken and RAID_CLASS_COLORS[classToken]) or PH.NEUTRAL_CLASS_COLOR
-    info.role = UnitGroupRolesAssigned(unit) or "NONE"
+    info.role = UnitGroupRolesAssigned(unit)
 
     local rating = GetRIOScore(unit)
     if rating == 0 then
@@ -132,7 +126,7 @@ local function GetMemberInfo(unit)
         end
     else
         local keystone = partyKeystones[info.name]
-        if keystone and keystone.level and keystone.level > 0 then
+        if keystone then
             info.keystoneName = keystone.name
             info.keystoneLevel = keystone.level
         end
@@ -179,7 +173,6 @@ function PH.GroupTab.Build(parent)
     local function CardOnEnter(self)
         self:SetBackdropBorderColor(unpack(Colors.border.light))
         local info = self._info
-        if not info then return end
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetUnit(info.unit)
         if self._hasPortal then
@@ -194,7 +187,7 @@ function PH.GroupTab.Build(parent)
 
     local function CardOnLeave(self)
         self:SetBackdropBorderColor(unpack(Colors.border.dark))
-        if self._hoverBg then self._hoverBg:SetColorTexture(1, 1, 1, 0) end
+        self._hoverBg:SetColorTexture(1, 1, 1, 0)
         GameTooltip:Hide()
     end
 
@@ -250,8 +243,8 @@ function PH.GroupTab.Build(parent)
         end
 
         table.sort(infos, function(a, b)
-            local orderA = ROLE_ORDER[a.role] or 4
-            local orderB = ROLE_ORDER[b.role] or 4
+            local orderA = ROLE_ORDER[a.role]
+            local orderB = ROLE_ORDER[b.role]
             if orderA ~= orderB then return orderA < orderB end
             return a.name < b.name
         end)
@@ -301,7 +294,7 @@ function PH.GroupTab.Build(parent)
         end
     end
 
-    local dropdown = Controls.Dropdown(parent, nil, { "Party", "Alts" }, "Party", function(val)
+    local dropdown = Controls.Dropdown(parent, { "Party", "Alts" }, "Party", function(val)
         if val == "Alts" then
             partyView:Hide()
             altsView:Show()
@@ -309,7 +302,7 @@ function PH.GroupTab.Build(parent)
             altsView:Hide()
             partyView:Show()
         end
-    end, nil, 120)
+    end, 120)
     dropdown:SetPoint("TOPLEFT", 0, -2)
 
     partyView:SetScript("OnShow", function()

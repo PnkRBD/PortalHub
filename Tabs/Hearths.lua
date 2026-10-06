@@ -120,7 +120,7 @@ function PH.HearthsTab.Build(parent)
     end
 
     local searchBox = Controls.SearchBox(parent, "Search hearthstones...", function(text)
-        currentSearch = text or ""
+        currentSearch = text
         Refresh()
     end, 210)
     searchBox:SetPoint("TOPLEFT", 0, 0)

@@ -18,7 +18,6 @@ local function ResolveClickedSpell(row, button)
     elseif button == "LeftButton" and row._knowsPortal then
         return row._portalID
     end
-    return nil
 end
 
 function PH.MageTab.Build(parent)
@@ -40,8 +39,7 @@ function PH.MageTab.Build(parent)
         local row = PH.SetupItemRow(rowParent)
         PH.BindHoverScripts(row)
         row:RegisterForClicks("LeftButtonDown", "RightButtonDown")
-        row:SetScript("PreClick", function(self, button, down)
-            if not down then return end
+        row:SetScript("PreClick", function(self, button)
             local spell = ResolveClickedSpell(self, button)
             if spell then
                 PH.SafeSetAttr(self, "type", "spell")

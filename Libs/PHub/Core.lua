@@ -39,54 +39,28 @@ local Colors = {
         normal = { 0.05, 0.055, 0.06, 0.98 },
         hover  = { 0.08, 0.085, 0.09, 0.98 },
     },
-    control = {
-        disabled = { 0.1, 0.1, 0.1, 1 },
-    },
 }
 UI.Colors = Colors
 
 function UI.GetAccent()
-    local _, class = UnitClass("player")
-    local c = class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
-    if c then return c.r, c.g, c.b, 1 end
-    return 0.45, 0.85, 0.65, 1
+    local c = RAID_CLASS_COLORS[select(2, UnitClass("player"))]
+    return c.r, c.g, c.b, 1
 end
-Colors.GetAccent = UI.GetAccent
 
 function UI.NewFrame(parent, opts)
-    opts = opts or {}
     local f = CreateFrame(opts.frameType or "Frame", nil, parent, "BackdropTemplate")
     f:SetBackdrop(UI.BACKDROP)
-    local bg = opts.bg or Colors.bg.dark
-    local border = opts.border or Colors.border.dark
-    f:SetBackdropColor(bg[1], bg[2], bg[3], bg[4] or 1)
-    f:SetBackdropBorderColor(border[1], border[2], border[3], border[4] or 1)
-    if opts.width then f:SetWidth(opts.width) end
-    if opts.height then f:SetHeight(opts.height) end
+    f:SetBackdropColor(unpack(opts.bg))
+    f:SetBackdropBorderColor(unpack(opts.border))
+    f:SetSize(opts.width, opts.height)
     return f
 end
 
 function UI.CreateTex(parent, r, g, b, a)
     local tex = parent:CreateTexture(nil, "ARTWORK")
     tex:SetTexture(UI.WHITE)
-    tex:SetVertexColor(r or 1, g or 1, b or 1, a or 1)
+    tex:SetVertexColor(r, g, b, a)
     return tex
-end
-
-local deferFrame = CreateFrame("Frame")
-deferFrame:Hide()
-local deferred = {}
-deferFrame:SetScript("OnUpdate", function(self)
-    self:Hide()
-    for i = 1, #deferred do
-        local fn = deferred[i]
-        deferred[i] = nil
-        fn()
-    end
-end)
-function UI.Defer(fn)
-    deferred[#deferred + 1] = fn
-    deferFrame:Show()
 end
 
 local MENU_ANIM_DURATION = 0.12
@@ -122,15 +96,14 @@ function UI.HideMenuAnimated(menu)
 end
 
 function UI.ScrollLogic(scrollFrame, child, track, thumb, opts)
-    opts = opts or {}
-    local step = opts.step or 40
+    local step = opts.step
     local scrollMax = 0
     local shown = false
     local math_max, math_min, math_floor = math.max, math.min, math.floor
 
     local function UpdateThumb()
-        local childH = child:GetHeight() or 0
-        local viewH = scrollFrame:GetHeight() or 0
+        local childH = child:GetHeight()
+        local viewH = scrollFrame:GetHeight()
         local range = math_max(0, childH - viewH)
         scrollMax = range
         local needs = range > 1
@@ -139,7 +112,7 @@ function UI.ScrollLogic(scrollFrame, child, track, thumb, opts)
             thumb:SetShown(needs)
             track:SetShown(needs)
             if not needs then scrollFrame:SetVerticalScroll(0) end
-            if opts.onShow then opts.onShow(needs) end
+            opts.onShow(needs)
         end
         if needs then
             local trackH = track:GetHeight()

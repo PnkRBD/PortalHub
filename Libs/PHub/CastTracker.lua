@@ -22,7 +22,7 @@ local function EnsureFill(frame)
 end
 
 local function Clear()
-    if activeFrame and activeFrame._phCastFill then
+    if activeFrame then
         activeFrame._phCastFill:Hide()
         activeFrame._phCastFill:SetWidth(0)
     end
@@ -34,9 +34,7 @@ function CastTracker.MarkPending(frame)
     pendingFrame = frame
 end
 
-function CastTracker.Stop()
-    Clear()
-end
+CastTracker.Stop = Clear
 
 local driver = CreateFrame("Frame")
 driver:Hide()
@@ -46,9 +44,7 @@ driver:SetScript("OnUpdate", function(self)
         self:Hide()
         return
     end
-    local duration = castEnd - castStart
-    if duration <= 0 then return end
-    local progress = math.min(1, (GetTime() - castStart) / duration)
+    local progress = math.min(1, (GetTime() - castStart) / (castEnd - castStart))
     activeFrame._phCastFill:SetWidth(math.max(1, activeFrame:GetWidth() * progress))
 end)
 
@@ -58,9 +54,7 @@ events:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
 events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 events:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player")
 events:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player")
-events:SetScript("OnEvent", function(_, event, unit)
-    if unit ~= "player" then return end
-
+events:SetScript("OnEvent", function(_, event)
     if event == "UNIT_SPELLCAST_START" then
         local frame = pendingFrame
         if not frame or not frame:IsShown() then return end

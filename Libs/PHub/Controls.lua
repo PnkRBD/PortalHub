@@ -8,16 +8,15 @@ local RH = UI.ROW_HEIGHT
 local LABEL_OFFSET = UI.LABEL_OFFSET
 local unpack = unpack
 
-function Controls.Text(parent, text, size, color)
+function Controls.Text(parent, text)
     local fs = parent:CreateFontString(nil, "OVERLAY")
-    fs:SetFont(UI.Font, size or FS, "")
-    fs:SetText(text or "")
-    fs:SetTextColor(unpack(color or T.text.primary))
+    fs:SetFont(UI.Font, FS, "")
+    fs:SetText(text)
+    fs:SetTextColor(unpack(T.text.primary))
     return fs
 end
 
-function Controls.ClearButton(parent, size, callback)
-    size = size or 18
+function Controls.ClearButton(parent, size)
     local f = CreateFrame("Button", nil, parent)
     f:SetSize(size, size)
     local mr, mg, mb = unpack(T.text.muted)
@@ -26,17 +25,12 @@ function Controls.ClearButton(parent, size, callback)
     x:SetText("\195\151")
     x:SetPoint("CENTER")
     x:SetTextColor(mr, mg, mb, 1)
-    f:SetScript("OnSizeChanged", function(s)
-        x:SetFont(UI.Font, math.floor(s:GetHeight() * 0.85), "")
-    end)
-    f:SetScript("OnClick", function() if callback then callback() end end)
     f:HookScript("OnEnter", function() x:SetTextColor(1, 1, 1, 1) end)
     f:HookScript("OnLeave", function() x:SetTextColor(mr, mg, mb, 1) end)
     return f
 end
 
 function Controls.CloseButton(parent, size, callback)
-    size = size or 24
     local btn = CreateFrame("Button", nil, parent)
     btn:SetSize(size, size)
     local x = btn:CreateFontString(nil, "OVERLAY")
@@ -46,12 +40,11 @@ function Controls.CloseButton(parent, size, callback)
     x:SetTextColor(unpack(T.text.muted))
     btn:SetScript("OnEnter", function() x:SetTextColor(1, 0.4, 0.4, 1) end)
     btn:SetScript("OnLeave", function() x:SetTextColor(unpack(T.text.muted)) end)
-    btn:SetScript("OnClick", function() if callback then callback() end end)
+    btn:SetScript("OnClick", callback)
     return btn
 end
 
 function Controls.Button(parent, text, width)
-    width = width or 100
     local f = UI.NewFrame(parent, {
         frameType = "Button",
         bg = T.button.normal, border = T.border.default,
@@ -74,7 +67,7 @@ function Controls.Button(parent, text, width)
         accentLine:SetAlpha(0)
     end)
 
-    local label = Controls.Text(f, text or "")
+    local label = Controls.Text(f, text)
     label:SetPoint("CENTER")
     f:SetScript("OnMouseDown", function(s) if s:IsEnabled() then label:SetPoint("CENTER", 1, -1) end end)
     f:SetScript("OnMouseUp", function() label:SetPoint("CENTER", 0, 0) end)
@@ -84,13 +77,10 @@ function Controls.Button(parent, text, width)
         local w = label:GetStringWidth() + 24
         if w > f:GetWidth() then f:SetWidth(w) end
     end
-    function f:GetText() return label:GetText() end
-    f.text = label
     return f
 end
 
 function Controls.SearchBox(parent, placeholder, callback, width)
-    width = width or 250
     local container = UI.NewFrame(parent, { bg = T.bg.input, border = T.border.input, width = width, height = RH })
 
     local function SetHovered(hovered)
@@ -130,31 +120,22 @@ function Controls.SearchBox(parent, placeholder, callback, width)
     local ph = box:CreateFontString(nil, "OVERLAY")
     ph:SetFont(UI.Font, 12, "")
     ph:SetPoint("LEFT")
-    ph:SetText(placeholder or "Search...")
+    ph:SetText(placeholder)
     ph:SetTextColor(unpack(T.text.muted))
 
     clearBtn:SetScript("OnClick", function()
         box:SetText("")
         box:ClearFocus()
-        ph:Show()
-        clearBtn:Hide()
-        if callback then callback("") end
     end)
     box:SetScript("OnTextChanged", function(s)
         local t = s:GetText()
         ph:SetShown(t == "")
         clearBtn:SetShown(t ~= "")
-        if callback then callback(t) end
+        callback(t)
     end)
     box:SetScript("OnEscapePressed", function(s) s:ClearFocus() end)
 
-    function container:GetValue() return box:GetText() end
-    function container:SetValue(val)
-        box:SetText(val or "")
-        ph:SetShown(val == "" or val == nil)
-        clearBtn:SetShown(val and val ~= "")
-    end
-    container.editbox = box
+    function container:SetValue(val) box:SetText(val) end
     return container
 end
 
@@ -167,7 +148,7 @@ local function SafeSetPropagateKeyboardInput(frame, value)
             propagateWaiter:SetScript("OnEvent", function(self)
                 self:UnregisterAllEvents()
                 for f, v in pairs(self.pending) do
-                    if f.SetPropagateKeyboardInput then f:SetPropagateKeyboardInput(v) end
+                    f:SetPropagateKeyboardInput(v)
                     self.pending[f] = nil
                 end
             end)
@@ -180,13 +161,10 @@ local function SafeSetPropagateKeyboardInput(frame, value)
 end
 
 function Controls.Keybind(parent, label, key, callback, width)
-    width = width or 280
-    local state = { key = key or "NONE", listening = false }
+    local state = { key = key, listening = false }
     local container = CreateFrame("Frame", nil, parent)
-    container:SetSize(width, label and (RH + LABEL_OFFSET) or RH)
-    if label then
-        Controls.Text(container, label, FS, T.text.primary):SetPoint("TOPLEFT")
-    end
+    container:SetSize(width, RH + LABEL_OFFSET)
+    Controls.Text(container, label):SetPoint("TOPLEFT")
 
     local row = UI.NewFrame(container, { bg = T.bg.input, border = T.border.input, width = width, height = RH })
     row:SetPoint("BOTTOMLEFT")
@@ -231,7 +209,7 @@ function Controls.Keybind(parent, label, key, callback, width)
     clearBtn:SetScript("OnClick", function()
         state.key = "NONE"
         UpdateDisplay()
-        if callback then callback(state.key) end
+        callback(state.key)
     end)
 
     row:EnableMouse(true)
@@ -248,7 +226,7 @@ function Controls.Keybind(parent, label, key, callback, width)
             if IsControlKeyDown() then m = m .. "CTRL-" end
             if IsAltKeyDown() then m = m .. "ALT-" end
             state.key = m .. k
-            if callback then callback(state.key) end
+            callback(state.key)
         end
         state.listening = false
         self:Hide()
@@ -263,18 +241,15 @@ function Controls.Keybind(parent, label, key, callback, width)
     end)
 
     UpdateDisplay()
-    function container:GetValue() return state.key end
-    function container:SetValue(val) state.key = val or "NONE"; UpdateDisplay() end
+    function container:SetValue(val) state.key = val; UpdateDisplay() end
     return container
 end
 
 local ANIM_DURATION = 0.14
 local function Lerp(a, b, t) return a + (b - a) * t end
 
-function Controls.SparkToggle(parent, label, checked, callback, indentLevel, enabled)
-    local indentPx = (indentLevel or 0) * 20
-    if enabled == nil then enabled = true end
-    local state = { enabled = checked or false, disabled = not enabled }
+function Controls.SparkToggle(parent, label, checked, callback)
+    local enabled = checked
 
     local LED = 14
     local HALO_OVERFLOW = 2
@@ -283,7 +258,7 @@ function Controls.SparkToggle(parent, label, checked, callback, indentLevel, ena
     local SPARK_TRAVEL = 13
 
     local container = CreateFrame("Frame", nil, parent)
-    container:SetSize(math.max(label and 200 or OUTER, OUTER + indentPx), OUTER)
+    container:SetSize(200, OUTER)
 
     local track = CreateFrame("Button", nil, container)
     track:SetAllPoints()
@@ -291,11 +266,11 @@ function Controls.SparkToggle(parent, label, checked, callback, indentLevel, ena
     local halo = track:CreateTexture(nil, "BACKGROUND")
     halo:SetTexture(UI.WHITE)
     halo:SetSize(OUTER, OUTER)
-    halo:SetPoint("CENTER", track, "LEFT", indentPx + OUTER / 2, 0)
+    halo:SetPoint("CENTER", track, "LEFT", OUTER / 2, 0)
 
     local ring = CreateFrame("Frame", nil, track, "BackdropTemplate")
     ring:SetSize(LED, LED)
-    ring:SetPoint("LEFT", track, "LEFT", indentPx + HALO_OVERFLOW, 0)
+    ring:SetPoint("LEFT", track, "LEFT", HALO_OVERFLOW, 0)
     ring:SetBackdrop(UI.BACKDROP)
 
     local fill = ring:CreateTexture(nil, "ARTWORK")
@@ -330,7 +305,6 @@ function Controls.SparkToggle(parent, label, checked, callback, indentLevel, ena
     end
 
     local function FireSparks()
-        if state.disabled then return end
         local r, g, b = UI.GetAccent()
         for _, s in ipairs(sparks) do
             s.tex:SetVertexColor(r, g, b, 1)
@@ -339,47 +313,25 @@ function Controls.SparkToggle(parent, label, checked, callback, indentLevel, ena
         end
     end
 
-    local labelFs
-    if label then
-        labelFs = Controls.Text(container, label, FS, T.text.primary)
-        labelFs:SetPoint("LEFT", ring, "RIGHT", 8, 0)
-    end
+    local labelFs = Controls.Text(container, label)
+    labelFs:SetPoint("LEFT", ring, "RIGHT", 8, 0)
 
-    local progress = state.enabled and 1 or 0
-    local lastEnabled = state.enabled
+    local progress = enabled and 1 or 0
 
     local function Render()
-        if state.enabled and not lastEnabled then FireSparks() end
-        lastEnabled = state.enabled
-
-        if state.disabled then
-            ring:SetBackdropColor(0.05, 0.05, 0.05, 1)
-            ring:SetBackdropBorderColor(unpack(T.border.dark))
-            fill:SetVertexColor(0.18, 0.18, 0.18, 0.6)
-            halo:SetVertexColor(0, 0, 0, 0)
-            if labelFs then labelFs:SetTextColor(unpack(T.text.disabled)) end
-            return
-        end
-
         local r, g, b = UI.GetAccent()
         ring:SetBackdropColor(Lerp(0.05, r * 0.7, progress), Lerp(0.05, g * 0.7, progress), Lerp(0.05, b * 0.7, progress), 1)
         ring:SetBackdropBorderColor(Lerp(0.22, r, progress), Lerp(0.22, g, progress), Lerp(0.22, b, progress), 1)
         fill:SetVertexColor(Lerp(0.13, r, progress), Lerp(0.13, g, progress), Lerp(0.13, b, progress), Lerp(0.4, 1, progress))
         halo:SetVertexColor(r, g, b, 0.32 * progress)
-        if labelFs then labelFs:SetTextColor(unpack(state.enabled and T.text.primary or T.text.muted)) end
-    end
-
-    local function Snap()
-        container:SetScript("OnUpdate", nil)
-        progress = state.enabled and 1 or 0
-        Render()
+        labelFs:SetTextColor(unpack(enabled and T.text.primary or T.text.muted))
     end
 
     track:SetScript("OnClick", function()
-        if state.disabled then return end
-        state.enabled = not state.enabled
+        enabled = not enabled
+        if enabled then FireSparks() end
         local from = progress
-        local target = state.enabled and 1 or 0
+        local target = enabled and 1 or 0
         local start = GetTime()
         container:SetScript("OnUpdate", function(self)
             local t = (GetTime() - start) / ANIM_DURATION
@@ -392,26 +344,21 @@ function Controls.SparkToggle(parent, label, checked, callback, indentLevel, ena
             end
             Render()
         end)
-        if callback then callback(state.enabled) end
+        callback(enabled)
     end)
 
-    Snap()
-    function container:GetValue() return state.enabled end
-    function container:SetValue(val) state.enabled = val; Snap() end
-    function container:SetEnabled(val) state.disabled = not val; Snap() end
+    Render()
     return container
 end
 
 function Controls.TabLineBar(parent, tabs, selected, callback, width)
-    width = width or 400
     local BAR_ROW_HEIGHT = 32
     local container = CreateFrame("Frame", nil, parent)
     local buttons = {}
-    local state = { selected = selected or 1 }
 
     local function UpdateAll()
         for i, btn in ipairs(buttons) do
-            if i == state.selected then
+            if i == selected then
                 btn.text:SetTextColor(unpack(T.text.primary))
                 btn.indicator:Show()
             else
@@ -447,15 +394,15 @@ function Controls.TabLineBar(parent, tabs, selected, callback, width)
         btn.indicator:Hide()
 
         btn:SetScript("OnClick", function()
-            state.selected = i
+            selected = i
             UpdateAll()
-            if callback then callback(i) end
+            callback(i)
         end)
         btn:SetScript("OnEnter", function()
-            if i ~= state.selected then btn.text:SetTextColor(unpack(T.text.secondary)) end
+            if i ~= selected then btn.text:SetTextColor(unpack(T.text.secondary)) end
         end)
         btn:SetScript("OnLeave", function()
-            if i ~= state.selected then btn.text:SetTextColor(unpack(T.text.muted)) end
+            if i ~= selected then btn.text:SetTextColor(unpack(T.text.muted)) end
         end)
         buttons[i] = btn
     end
@@ -469,7 +416,6 @@ function Controls.TabLineBar(parent, tabs, selected, callback, width)
 
     UpdateAll()
 
-    function container:GetSelected() return state.selected end
-    function container:SetSelected(val) state.selected = val; UpdateAll() end
+    function container:SetSelected(val) selected = val; UpdateAll() end
     return container
 end

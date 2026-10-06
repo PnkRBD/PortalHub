@@ -27,7 +27,7 @@ PH.AltsTab = {}
 local function CharKey()
     local name = UnitName("player")
     local realm = GetRealmName()
-    return name .. "-" .. (realm or "?"), name, realm
+    return name .. "-" .. realm, name, realm
 end
 
 local function CaptureOwnKey()
@@ -49,18 +49,15 @@ local function CaptureOwnKey()
     local mapID = C_MythicPlus.GetOwnedKeystoneChallengeMapID()
     if level and level > 0 and mapID and mapID > 0 then
         entry.keyLevel = level
-        entry.keyMapID = mapID
         entry.keyName = C_ChallengeMode.GetMapUIInfo(mapID)
         local resetIn = C_DateAndTime.GetSecondsUntilWeeklyReset()
         entry.keyReset = GetServerTime() + (resetIn or 0)
     else
         entry.keyLevel = nil
-        entry.keyMapID = nil
         entry.keyName = nil
         entry.keyReset = nil
     end
 
-    entry.updated = GetServerTime()
     store[key] = entry
 end
 
@@ -96,7 +93,6 @@ function PH.AltsTab.Build(parent)
     local function CardOnEnter(self)
         self:SetBackdropBorderColor(unpack(Colors.border.light))
         local info = self._info
-        if not info then return end
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:AddLine(info.displayName, info.classColor.r, info.classColor.g, info.classColor.b)
         if info.keystoneName and info.keystoneLevel then
@@ -104,7 +100,7 @@ function PH.AltsTab.Build(parent)
         else
             GameTooltip:AddLine("No key", 0.6, 0.6, 0.6)
         end
-        if info.rating and info.rating > 0 then
+        if info.rating > 0 then
             GameTooltip:AddLine("Rating: " .. info.rating, 0.8, 0.8, 0.8)
         end
         if self._hasPortal then
@@ -122,13 +118,13 @@ function PH.AltsTab.Build(parent)
 
     local function CardOnLeave(self)
         self:SetBackdropBorderColor(unpack(Colors.border.dark))
-        if self._hoverBg then self._hoverBg:SetColorTexture(1, 1, 1, 0) end
+        self._hoverBg:SetColorTexture(1, 1, 1, 0)
         GameTooltip:Hide()
     end
 
     local function CardPostClick(self, button)
         if button == "RightButton" then
-            if IsControlKeyDown() and not self._isCurrent and self._storeKey and PortalHubDB.altKeys then
+            if IsControlKeyDown() and not self._isCurrent then
                 PortalHubDB.altKeys[self._storeKey] = nil
                 C_Timer_After(0, PH.AltsTab.Refresh)
             end
@@ -173,25 +169,22 @@ function PH.AltsTab.Build(parent)
         CaptureOwnKey()
         cardPool.ReleaseAll()
 
-        local store = PortalHubDB.altKeys or {}
         local now = GetServerTime()
-        local curKey = (CharKey())
+        local curKey = CharKey()
         local myRealm = GetRealmName()
 
         local list = {}
-        for storeKey, e in pairs(store) do
-            local validKey = e.keyLevel and e.keyReset and now < e.keyReset
-            local classColor = (e.class and RAID_CLASS_COLORS[e.class]) or PH.NEUTRAL_CLASS_COLOR
-            local foreign = e.realm and myRealm and e.realm ~= myRealm
+        for storeKey, e in pairs(PortalHubDB.altKeys) do
+            local validKey = e.keyLevel and now < e.keyReset
             list[#list + 1] = {
                 storeKey = storeKey,
-                name = e.name or "?",
-                displayName = (foreign and ((e.name or "?") .. "-" .. e.realm)) or (e.name or "?"),
-                classColor = classColor,
-                rating = e.rating or 0,
-                keystoneName = (validKey and e.keyName) or nil,
-                keystoneLevel = (validKey and e.keyLevel) or nil,
-                portalSpellID = (validKey and e.keyName) and PH.FindPortalSpell(e.keyName) or nil,
+                name = e.name,
+                displayName = e.realm == myRealm and e.name or e.name .. "-" .. e.realm,
+                classColor = RAID_CLASS_COLORS[e.class],
+                rating = e.rating,
+                keystoneName = validKey and e.keyName or nil,
+                keystoneLevel = validKey and e.keyLevel or nil,
+                portalSpellID = validKey and e.keyName and PH.FindPortalSpell(e.keyName) or nil,
                 isCurrent = storeKey == curKey,
             }
         end

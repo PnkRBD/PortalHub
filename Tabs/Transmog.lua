@@ -46,8 +46,8 @@ function PH.TransmogTab.Build(parent)
         local row = PH.SetupItemRow(rowParent)
         PH.BindHoverScripts(row)
         row:RegisterForClicks("LeftButtonDown")
-        row:SetScript("PreClick", function(self, button, down)
-            if not down or not self._owned then return end
+        row:SetScript("PreClick", function(self)
+            if not self._owned then return end
             PH.SafeSetAttr(self, "type", "toy")
             PH.SafeSetAttr(self, "toy", self._entryID)
         end)
@@ -106,7 +106,7 @@ function PH.TransmogTab.Build(parent)
     end
 
     local searchBox = Controls.SearchBox(parent, "Search transmog toys...", function(text)
-        currentSearch = text or ""
+        currentSearch = text
         Refresh()
     end, 210)
     searchBox:SetPoint("TOPLEFT", 0, 0)
