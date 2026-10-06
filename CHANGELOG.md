@@ -1,3 +1,10 @@
+# 2.3
+
+- New toys and hearthstones now have a NEW tag until you use them.
+- Removed Reading Glasses from the transmog toys, it just makes your screen blurry.
+- The home button next to the title stays put now.
+- Cleaned up a lot of code under the hood.
+
 # 2.2
 
 - Added 4 hearthstones: Draenic Hologem, Mycomancer's Hearthspore, Hiveborne Hearthstone and Shadeweaver's Hearthstone. The last two come with 12.1.5.
