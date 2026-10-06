@@ -204,7 +204,7 @@ fi
   printf -- '-- Add or remove entries via tools/curated-extra.txt and tools/exclude.txt,\n'
   printf -- '-- then re-run: bash tools/pull-toys.sh --refresh\n\n'
   printf 'PH.TransmogToys = {\n'
-  awk -F'\t' '{printf "    { id = %s, name = \"%s\" },\n", $1, $2}' "$CACHE/final.tsv"
+  awk -F'\t' '{gsub(/\\/, "\\\\", $2); gsub(/"/, "\\\"", $2); printf "    { id = %s, name = \"%s\" },\n", $1, $2}' "$CACHE/final.tsv"
   printf '}\n'
 } > "$OUT"
 
