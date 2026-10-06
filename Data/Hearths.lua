@@ -43,4 +43,8 @@ PH.HearthToys = {
     { id = 263933, name = "Preyseeker's Hearthstone" },
     { id = 263489, name = "Naaru's Enfold" },
     { id = 265100, name = "Corewarden's Hearthstone" },
+    { id = 210455, name = "Draenic Hologem" },
+    { id = 264367, name = "Mycomancer's Hearthspore" },
+    { id = 281136, name = "Hiveborne Hearthstone" },
+    { id = 281615, name = "Shadeweaver's Hearthstone" },
 }
